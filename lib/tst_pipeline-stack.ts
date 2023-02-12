@@ -31,7 +31,7 @@ export class TstPipelineStack extends cdk.Stack {
     })
     // const result = spawnSync('git', ['log', '--format=%H', '-n', '1']);
     // const revision = result.stdout.toString().trim().substr(0, 8);
-    const cdkSourceOutput = new Artifact("CDKSourceOutput")
+    const sourceoutput = new Artifact("sourceoutput")
     pipeline.addStage({
       stageName: "source",
       actions: [
@@ -41,20 +41,20 @@ export class TstPipelineStack extends cdk.Stack {
           branch: "master",
           actionName: "Pipeline_Source",
           oauthToken: SecretValue.secretsManager("git_secret_key"),
-          output: cdkSourceOutput
+          output: sourceoutput
         }
         )
       ]
     })
 
-    const cdkBuildOutput = new Artifact("CdkBuildOutPut")
+    const BuildOutput = new Artifact("BuildOutput")
     const buildStage = pipeline.addStage({
       stageName: "build",
       actions: [
         new CodeBuildAction({
           actionName: "CDK_Build",
-          input: cdkSourceOutput,
-          outputs: [cdkBuildOutput],
+          input: sourceoutput,
+          outputs: [BuildOutput],
           project: new PipelineProject(this, "CdkBuildProject", {
             environment: {
               buildImage: LinuxBuildImage.STANDARD_5_0,
@@ -104,7 +104,7 @@ export class TstPipelineStack extends cdk.Stack {
         new CloudFormationCreateUpdateStackAction({
           actionName: "Pipeline_Update",
           stackName: "TstPipelineStack",
-          templatePath: cdkBuildOutput.atPath("TstPipelineStack.template.json"),
+          templatePath: BuildOutput.atPath("TstPipelineStack.template.json"),
           adminPermissions: true,
         }),
       ],
