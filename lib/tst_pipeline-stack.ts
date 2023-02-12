@@ -67,48 +67,48 @@ export class TstPipelineStack extends cdk.Stack {
 
       ],
     });
-    const snsTopic = new SnsTopic(this.pipelineNotificationsTopic1, {
+    // const snsTopic = new SnsTopic(this.pipelineNotificationsTopic1, {
 
-      message: RuleTargetInput.fromText(
-        `Build Test Failed `
-      ),
+    //   message: RuleTargetInput.fromText(
+    //     `Build Test Failed `
+    //   ),
 
-    });
-    buildStage.onStateChange("FAILED", snsTopic, {
-      ruleName: "Failed",
-      eventPattern: {
-        detail: {
-          state: ["FAILED"],
-        },
-      },
-      description: "Build Test Failed",
-    });
-    const snsTopicSuccess = new SnsTopic(this.pipelineNotificationsTopic1, {
-      message: RuleTargetInput.fromText(
-        `Build Test Successed`
-      ),
-    });
+    // });
+    // buildStage.onStateChange("FAILED", snsTopic, {
+    //   ruleName: "Failed",
+    //   eventPattern: {
+    //     detail: {
+    //       state: ["FAILED"],
+    //     },
+    //   },
+    //   description: "Build Test Failed",
+    // });
+    // const snsTopicSuccess = new SnsTopic(this.pipelineNotificationsTopic1, {
+    //   message: RuleTargetInput.fromText(
+    //     `Build Test Successed`
+    //   ),
+    // });
 
-    buildStage.onStateChange("SUCCEEDED", snsTopicSuccess, {
-      ruleName: "Success",
-      eventPattern: {
-        detail: {
-          state: ["SUCCEEDED"],
-        },
-      },
-      description: "Build Test Successful",
-    });
-    pipeline.addStage({
-      stageName: "Pipeline_Update",
-      actions: [
-        new CloudFormationCreateUpdateStackAction({
-          actionName: "Pipeline_Update",
-          stackName: "TstPipelineStack",
-          templatePath: cdkBuildOutput.atPath("TstPipelineStack.template.json"),
-          adminPermissions: true,
-        }),
-      ],
+    // buildStage.onStateChange("SUCCEEDED", snsTopicSuccess, {
+    //   ruleName: "Success",
+    //   eventPattern: {
+    //     detail: {
+    //       state: ["SUCCEEDED"],
+    //     },
+    //   },
+    //   description: "Build Test Successful",
+    // });
+    // pipeline.addStage({
+    //   stageName: "Pipeline_Update",
+    //   actions: [
+    //     new CloudFormationCreateUpdateStackAction({
+    //       actionName: "Pipeline_Update",
+    //       stackName: "TstPipelineStack",
+    //       templatePath: cdkBuildOutput.atPath("TstPipelineStack.template.json"),
+    //       adminPermissions: true,
+    //     }),
+    //   ],
 
-    });
+    // });
   }
 }
