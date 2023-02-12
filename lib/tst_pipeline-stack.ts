@@ -11,21 +11,21 @@ import { spawnSync } from 'child_process';
 import { Construct } from 'constructs';
 
 export class TstPipelineStack extends cdk.Stack {
-  private readonly pipelineNotificationsTopic: Topic;
+  private readonly pipelineNotificationsTopic1: Topic;
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
-    this.pipelineNotificationsTopic = new Topic(
+    this.pipelineNotificationsTopic1 = new Topic(
       this,
-      "PipelineNotificationsTopic",
+      "PipelineNotificationsTopic1",
       {
-        topicName: "PipelineNotifications",
+        topicName: "PipelineNotifications1",
       }
     );
-    this.pipelineNotificationsTopic.addSubscription(
+    this.pipelineNotificationsTopic1.addSubscription(
       new EmailSubscription("suresh.sahu@trangile.com")
     );
-    const pipeline = new Pipeline(this, "Pipeline", {
-      pipelineName: 'pipelinestack',
+    const pipeline = new Pipeline(this, "Pipeline1", {
+      pipelineName: 'tstpipelinestack',
       crossAccountKeys: false,
       restartExecutionOnUpdate: true,
     })
@@ -37,7 +37,7 @@ export class TstPipelineStack extends cdk.Stack {
       actions: [
         new GitHubSourceAction({
           owner: "Suresh14531453",
-          repo: "gittestfilefornewman",
+          repo: "TstPipelineStack",
           branch: "master",
           actionName: "Pipeline_Source",
           oauthToken: SecretValue.secretsManager("git_secret_key"),
@@ -67,48 +67,48 @@ export class TstPipelineStack extends cdk.Stack {
 
       ],
     });
-    // const snsTopic = new SnsTopic(this.pipelineNotificationsTopic, {
+    const snsTopic = new SnsTopic(this.pipelineNotificationsTopic1, {
 
-    //   message: RuleTargetInput.fromText(
-    //     `Build Test Failed `
-    //   ),
+      message: RuleTargetInput.fromText(
+        `Build Test Failed `
+      ),
 
-    // });
-    // buildStage.onStateChange("FAILED", SnsTopic, {
-    //   ruleName: "Failed",
-    //   eventPattern: {
-    //     detail: {
-    //       state: ["FAILED"],
-    //     },
-    //   },
-    //   description: "Build Test Failed",
-    // });
-    // const snsTopicSuccess = new SnsTopic(this.pipelineNotificationsTopic, {
-    //   message: RuleTargetInput.fromText(
-    //     `Build Test Successed`
-    //   ),
-    // });
+    });
+    buildStage.onStateChange("FAILED", snsTopic, {
+      ruleName: "Failed",
+      eventPattern: {
+        detail: {
+          state: ["FAILED"],
+        },
+      },
+      description: "Build Test Failed",
+    });
+    const snsTopicSuccess = new SnsTopic(this.pipelineNotificationsTopic1, {
+      message: RuleTargetInput.fromText(
+        `Build Test Successed`
+      ),
+    });
 
-    // buildStage.onStateChange("SUCCEEDED", snsTopicSuccess, {
-    //   ruleName: "Success",
-    //   eventPattern: {
-    //     detail: {
-    //       state: ["SUCCEEDED"],
-    //     },
-    //   },
-    //   description: "Build Test Successful",
-    // });
-    // // pipeline.addStage({
-    // //   stageName: "Pipeline_Update",
-    // //   actions: [
-    // //     new CloudFormationCreateUpdateStackAction({
-    // //       actionName: "Pipeline_Update",
-    // //       stackName: "AwsCdkTestStack",
-    // //       templatePath: cdkBuildOutput.atPath("TstPipelineStack.template.json"),
-    // //       adminPermissions: true,
-    // //     }),
-    // //   ],
+    buildStage.onStateChange("SUCCEEDED", snsTopicSuccess, {
+      ruleName: "Success",
+      eventPattern: {
+        detail: {
+          state: ["SUCCEEDED"],
+        },
+      },
+      description: "Build Test Successful",
+    });
+    pipeline.addStage({
+      stageName: "Pipeline_Update",
+      actions: [
+        new CloudFormationCreateUpdateStackAction({
+          actionName: "Pipeline_Update",
+          stackName: "TstPipelineStack",
+          templatePath: cdkBuildOutput.atPath("TstPipelineStack.template.json"),
+          adminPermissions: true,
+        }),
+      ],
 
-    // // });
+    });
   }
 }
