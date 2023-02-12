@@ -1,0 +1,34 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - npm install
+      - npm install -g newman
+      - npm install -g newman-reporter-html 
+  build:
+    commands:
+      - npm run build
+      - npm run test
+      - npm run cdk synth
+      - DATE_TIME=$(date +"%Y-%m-%d-%H-%M-%S")
+      - echo "commit will be $(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-8)"
+      - export IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-8)
+      - newman run collection_file1.json -d test_data1.csv --reporters html --reporter-html-export report8-$IMAGE_TAG.html
+      - if [ $? -ne 0 ]; then exit 1; fi
+  # post_build:
+  #   commands:
+  #     - aws s3 cp report8-$IMAGE_TAG.html s3://awscdkteststack-pipelineartifactsbucket22248f97-118rqbrpqpc5o/reports/report8-$IMAGE_TAG.html
+  #     - echo "Build process has completed."
+
+artifacts:
+  base-directory: cdk.out
+  files:
+    - '**/*'
+
+# reports:
+#   jest_reports:
+#     files:
+#       - 'test-report.xml'
+#     file-format: JUNITXML
+#     base-directory: 'test-reports'
+  
